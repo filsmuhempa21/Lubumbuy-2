@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LubumBuy - Temps Réel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTHVidW1CdXkiLCJzaG9ydF9uYW1lIjoiTHVidW1CdXkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCJ9">
+<meta name="theme-color" content="#000000">
+</head>
+<body class="bg-gray-50">
+<script>
+const SUPABASE_URL = "https://xsqmiwvkcfprksinkidn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_CAjl7aRjFRhWy5grITMi6w_9UqtlfXe";
+const VENDEUR_WHATSAPP = "243971234567";
+const ORANGE_MONEY_NUM = "0851234567";
+const AIRTEL_MONEY_NUM = "0971234567";
+const ADMIN_PASS = "25325217";
+const NOM_BOUTIQUE = "LubumBuy";
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<header class="bg-white shadow sticky top-0 z-20">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-2">
+    <h1 class="font-bold text-lg">Lubum<span class="text-orange-500">Buy</span></h1>
+    <div class="flex gap-2">
+      <button onclick="inviter()" class="bg-blue-500 text-white px-3 py-2 rounded-full text-xs font-bold">📤 Inviter</button>
+      <button onclick="showHistory()" class="bg-gray-200 px-3 py-2 rounded-full text-xs font-bold">Historique</button>
+      <button onclick="adminLogin()" class="bg-black text-white px-3 py-2 rounded-full text-xs">Admin</button>
+      <button onclick="toggleCart(true)" class="bg-orange-500 text-white px-3 py-2 rounded-full text-xs font-bold">Panier (<span id="cartCount">0</span>)</button>
+    </div>
+  </div>
+  <button id="installBtn" onclick="installerApp()" style="display:none" class="w-full bg-black text-white py-3 text-sm font-bold animate-pulse">📲 Installer l'application</button>
+</header>
+<main class="max-w-6xl mx-auto px-4 py-6">
+  <div id="products" class="grid grid-cols-2 md:grid-cols-3 gap-4"><p class="text-gray-400 text-center col-span-3">Chargement produits en temps réel...</p></div>
+</main>
+<div id="cart" class="fixed inset-0 bg-black/40 z-30 hidden"><div class="ml-auto bg-white h-full w-full md:w-[420px] p-6 flex flex-col rounded-l-2xl">
+  <div class="flex justify-between mb-4"><h2 class="font-bold text-xl">Panier</h2><button onclick="toggleCart()" class="text-2xl">×</button></div>
+  <div id="cartItems" class="flex-1 overflow-auto space-y-3"></div>
+  <div class="border-t pt-4 space-y-2">
+    <button onclick="payerWhatsApp()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold">💬 Payer via WhatsApp</button>
+    <button onclick="payerMoney('Orange Money',ORANGE_MONEY_NUM)" class="w-full bg-[#FF6600] text-white py-3 rounded-xl font-bold">Orange Money</button>
+    <button onclick="payerMoney('Airtel Money',AIRTEL_MONEY_NUM)" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold">Airtel Money</button>
+  </div>
+</div></div>
+<div id="adminPanel" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-auto">
+    <div class="flex justify-between mb-4"><h2 class="font-bold text-xl">Panel Admin - LIVE</h2><button onclick="document.getElementById('adminPanel').classList.add('hidden')" class="text-xl">×</button></div>
+    <input id="pName" placeholder="Nom produit" class="w-full border p-3 rounded-xl mb-2">
+    <input id="pPrice" type="number" placeholder="Prix en $" class="w-full border p-3 rounded-xl mb-2">
+    <label class="text-xs font-bold">Photo:</label>
+    <input id="pPhoto" type="file" accept="image/*" class="w-full border p-2 rounded-xl mb-3">
+    <img id="preview" class="w-full h-32 object-cover rounded-xl hidden mb-3">
+    <button onclick="addProduct()" class="w-full bg-black text-white py-3 rounded-full font-bold mb-6">Publier en Temps Réel</button>
+    <h3 class="font-bold mb-2">Gérer produits</h3>
+    <div id="adminList" class="space-y-2"></div>
+  </div>
+</div>
+<div id="payModal" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center"><h3 id="payTitle" class="font-bold text-xl"></h3><p class="bg-gray-100 p-3 rounded-xl mt-3"><span id="payNumber" class="font-bold text-xl"></span><br><span id="payAmount" class="text-orange-500 font-bold"></span></p><p id="payUSSD" class="text-xs bg-yellow-100 p-2 rounded mt-3"></p><div class="flex gap-2 mt-4"><button onclick="copyNumber()" class="flex-1 border py-3 rounded-full">Copier</button><button onclick="confirmerPaiement()" class="flex-1 bg-black text-white py-3 rounded-full">J'ai payé</button></div><button onclick="document.getElementById('payModal').classList.add('hidden')" class="mt-3 text-xs text-gray-400">Fermer</button></div></div>
+<div id="histModal" class="fixed inset-0 bg-black/60 z-40 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-auto"><div class="flex justify-between mb-4"><h3 class="font-bold">Historiques</h3><button onclick="document.getElementById('histModal').classList.add('hidden')">×</button></div><div id="histList"></div></div></div>
+<script>
+let products=[], cart=JSON.parse(localStorage.getItem('lb_cart_v2'))||[], history=JSON.parse(localStorage.getItem('lb_history'))||[], currentPayMethod="", tempImage="";
+document.getElementById('pPhoto').addEventListener('change',e=>{let r=new FileReader();r.onload=ev=>{tempImage=ev.target.result;document.getElementById('preview').src=tempImage;document.getElementById('preview').classList.remove('hidden');};r.readAsDataURL(e.target.files[0]);});
+async function loadProducts(){let {data,error}=await supa.from('produits').select('*').order('created_at',{ascending:false}); if(!error){products=data; render();}}
+loadProducts();
+supa.channel('realtime-produits').on('postgres_changes',{event:'*',schema:'public',table:'produits'},()=>loadProducts()).subscribe();
+async function addProduct(){let name=document.getElementById('pName').value, price=parseFloat(document.getElementById('pPrice').value), img=tempImage||`https://picsum.photos/400/300?random=${Date.now()}`; if(!name||!price) return alert('Nom et prix obligatoires'); let {error}=await supa.from('produits').insert([{name,price,img}]); if(error) alert(error.message); else {document.getElementById('pName').value='';document.getElementById('pPrice').value='';tempImage='';document.getElementById('preview').classList.add('hidden'); alert('Publié! Tout le monde le voit instantanément');}}
+async function delProd(id){if(confirm('Supprimer ce produit pour tout le monde?')){await supa.from('produits').delete().eq('id',id);}}
+function save(){localStorage.setItem('lb_cart_v2',JSON.stringify(cart));localStorage.setItem('lb_history',JSON.stringify(history));}
+function render(){document.getElementById('products').innerHTML=products.length?products.map(p=>`<div class="bg-white rounded-2xl shadow overflow-hidden"><img src="${p.img}" class="h-32 w-full object-cover"><div class="p-3"><p class="font-bold text-sm">${p.name}</p><p class="text-orange-500 font-bold">${p.price} $</p><button onclick="addToCart(${p.id})" class="w-full mt-2 bg-black text-white py-2 rounded-full text-xs">Acheter</button></div></div>`).join(''):'<p class="text-center col-span-3 text-gray-400">Aucun produit - Va dans Admin pour publier</p>'; updateCart(); renderAdminList();}
+function addToCart(id){let p=products.find(x=>x.id==id);let it=cart.find(x=>x.id==id);if(it)it.qty++;else cart.push({...p,qty:1});save();updateCart();toggleCart(true);}
+function updateCart(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.qty,0);let total=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('payAmount').innerText=total+' $';document.getElementById('cartItems').innerHTML=cart.map(i=>`<div class="flex gap-2 text-sm"><img src="${i.img}" class="w-12 h-12 rounded"><div><b>${i.name}</b><br>${i.price}$ x ${i.qty}</div></div>`).join('')||'Panier vide';}
+function toggleCart(o){let el=document.getElementById('cart');if(o===true)el.classList.remove('hidden');else el.classList.toggle('hidden');}
+function adminLogin(){let pass=prompt('Mot de passe Admin:'); if(pass===ADMIN_PASS){document.getElementById('adminPanel').classList.remove('hidden'); renderAdminList();} else if(pass!==null) alert('Mot de passe incorrect');}
+function renderAdminList(){document.getElementById('adminList').innerHTML=products.map(p=>`<div class="flex justify-between items-center border p-2 rounded"><span class="text-xs">${p.name} - ${p.price}$</span><button onclick="delProd(${p.id})" class="text-red-500 text-xs">Supprimer</button></div>`).join('');}
+function getTotal(){return cart.reduce((s,i)=>s+i.price*i.qty,0);}
+function getMsg(){return `Commande ${NOM_BOUTIQUE}:%0A${cart.map(i=>`- ${i.name} x${i.qty} = ${i.price*i.qty}$`).join('%0A')}%0ATotal: ${getTotal()}$%0AMode: ${currentPayMethod}`;}
+function payerWhatsApp(){if(!cart.length)return alert('Panier vide');currentPayMethod='WhatsApp';saveHistory();window.open(`https://wa.me/${VENDEUR_WHATSAPP}?text=${getMsg()}`,'_blank');}
+function payerMoney(t,p){if(!cart.length)return alert('Panier vide');currentPayMethod=t;document.getElementById('payTitle').innerText=t;document.getElementById('payNumber').innerText=p;document.getElementById('payUSSD').innerText=t.includes('Orange')?`*144*1*1*${p}*${getTotal()}#`:`*150*1*1*${p}*${getTotal()}#`;document.getElementById('payModal').classList.remove('hidden');}
+function copyNumber(){navigator.clipboard.writeText(document.getElementById('payNumber').innerText);alert('Numéro copié');}
+function confirmerPaiement(){saveHistory();document.getElementById('payModal').classList.add('hidden');window.open(`https://wa.me/${VENDEUR_WHATSAPP}?text=${getMsg()}%0AJ'ai payé par ${currentPayMethod}`, '_blank');}
+function saveHistory(){history.unshift({date:new Date().toLocaleString(),items:[...cart],total:getTotal(),method:currentPayMethod}); save();}
+function showHistory(){document.getElementById('histModal').classList.remove('hidden');document.getElementById('histList').innerHTML=history.length?history.map(h=>`<div class="border-b py-2 text-xs"><b>${h.date}</b> - ${h.method}<br>${h.items.map(i=>i.name+' x'+i.qty).join(', ')}<br><b>Total: ${h.total}$</b></div>`).join(''):'Aucun historique';}
+let deferredPrompt; window.addEventListener('beforeinstallprompt', (e)=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='block';});
+function installerApp(){if(deferredPrompt){deferredPrompt.prompt();}else{alert('Android: 3 points > Installer\nIphone: Partage > Ecran d\'accueil');}}
+function inviter(){let lien=window.location.href;let text=`📱 Mon appli ${NOM_BOUTIQUE} ici: ${lien}`;window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');}
+</script>
+</body>
+</html>
