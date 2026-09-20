@@ -5,16 +5,16 @@
 <title>LubumBuy - Temps Réel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTHVidW1CdXkiLCJzaG9ydF9uYW1lIjoiTHVidW1CdXkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCJ9">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 </head>
 <body class="bg-gray-50">
 <script>
 const SUPABASE_URL = "https://xsqmiwvkcfprksinkidn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_CAjl7aRjFRhWy5grITMi6w_9UqtlfXe";
-const VENDEUR_WHATSAPP = "243971234567";
-const ORANGE_MONEY_NUM = "0851234567";
-const AIRTEL_MONEY_NUM = "0971234567";
+const VENDEUR_WHATSAPP = "243994528478";
+const ORANGE_MONEY_NUM = "0844915557";
+const AIRTEL_MONEY_NUM = "0994528478";
 const ADMIN_PASS = "25325217";
 const NOM_BOUTIQUE = "LubumBuy";
 const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -38,9 +38,11 @@ const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   <div class="flex justify-between mb-4"><h2 class="font-bold text-xl">Panier</h2><button onclick="toggleCart()" class="text-2xl">×</button></div>
   <div id="cartItems" class="flex-1 overflow-auto space-y-3"></div>
   <div class="border-t pt-4 space-y-2">
+    <div class="flex justify-between font-bold text-lg px-2"><span>Total</span><span id="cartTotal">0 $</span></div>
     <button onclick="payerWhatsApp()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold">💬 Payer via WhatsApp</button>
     <button onclick="payerMoney('Orange Money',ORANGE_MONEY_NUM)" class="w-full bg-[#FF6600] text-white py-3 rounded-xl font-bold">Orange Money</button>
     <button onclick="payerMoney('Airtel Money',AIRTEL_MONEY_NUM)" class="w-full bg-red-600 text-white py-3 rounded-xl font-bold">Airtel Money</button>
+    <h1 class="text-[10px] text-center text-gray-400 mt-2">@freeze studio[developpe par fils muhempa]</h1>
   </div>
 </div></div>
 <div id="adminPanel" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
@@ -69,7 +71,7 @@ async function delProd(id){if(confirm('Supprimer ce produit pour tout le monde?'
 function save(){localStorage.setItem('lb_cart_v2',JSON.stringify(cart));localStorage.setItem('lb_history',JSON.stringify(history));}
 function render(){document.getElementById('products').innerHTML=products.length?products.map(p=>`<div class="bg-white rounded-2xl shadow overflow-hidden"><img src="${p.img}" class="h-32 w-full object-cover"><div class="p-3"><p class="font-bold text-sm">${p.name}</p><p class="text-orange-500 font-bold">${p.price} $</p><button onclick="addToCart(${p.id})" class="w-full mt-2 bg-black text-white py-2 rounded-full text-xs">Acheter</button></div></div>`).join(''):'<p class="text-center col-span-3 text-gray-400">Aucun produit - Va dans Admin pour publier</p>'; updateCart(); renderAdminList();}
 function addToCart(id){let p=products.find(x=>x.id==id);let it=cart.find(x=>x.id==id);if(it)it.qty++;else cart.push({...p,qty:1});save();updateCart();toggleCart(true);}
-function updateCart(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.qty,0);let total=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('payAmount').innerText=total+' $';document.getElementById('cartItems').innerHTML=cart.map(i=>`<div class="flex gap-2 text-sm"><img src="${i.img}" class="w-12 h-12 rounded"><div><b>${i.name}</b><br>${i.price}$ x ${i.qty}</div></div>`).join('')||'Panier vide';}
+function updateCart(){let total=cart.reduce((s,i)=>s+i.price*i.qty,0); document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.qty,0); document.getElementById('cartTotal').innerText=total+' $'; document.getElementById('payAmount').innerText=total+' $'; document.getElementById('cartItems').innerHTML=cart.map(i=>`<div class="flex gap-2 text-sm"><img src="${i.img}" class="w-12 h-12 rounded"><div><b>${i.name}</b><br>${i.price}$ x ${i.qty}</div></div>`).join('')||'Panier vide';}
 function toggleCart(o){let el=document.getElementById('cart');if(o===true)el.classList.remove('hidden');else el.classList.toggle('hidden');}
 function adminLogin(){let pass=prompt('Mot de passe Admin:'); if(pass===ADMIN_PASS){document.getElementById('adminPanel').classList.remove('hidden'); renderAdminList();} else if(pass!==null) alert('Mot de passe incorrect');}
 function renderAdminList(){document.getElementById('adminList').innerHTML=products.map(p=>`<div class="flex justify-between items-center border p-2 rounded"><span class="text-xs">${p.name} - ${p.price}$</span><button onclick="delProd(${p.id})" class="text-red-500 text-xs">Supprimer</button></div>`).join('');}
@@ -84,6 +86,7 @@ function showHistory(){document.getElementById('histModal').classList.remove('hi
 let deferredPrompt; window.addEventListener('beforeinstallprompt', (e)=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='block';});
 function installerApp(){if(deferredPrompt){deferredPrompt.prompt();}else{alert('Android: 3 points > Installer\nIphone: Partage > Ecran d\'accueil');}}
 function inviter(){let lien=window.location.href;let text=`📱 Mon appli ${NOM_BOUTIQUE} ici: ${lien}`;window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}
 </script>
 </body>
 </html>
