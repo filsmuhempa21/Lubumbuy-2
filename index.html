@@ -95,5 +95,8 @@ function installerApp(){if(deferredPrompt){deferredPrompt.prompt();}else{alert('
 function inviter(){let lien=window.location.href;let text=`📱 Mon appli ${NOM_BOUTIQUE} ici: ${lien}`;window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js')}
 </script>
+  <footer style="text-align:center;padding:20px;background:#f5f5f5;">
+<a href="Contact.html">Contact</a> | <a href="Confidentialite.html">Confidentialité</a>
+  </footer>
 </body>
 </html>
